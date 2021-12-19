@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class FloatWidget extends StatefulWidget {
   final Widget child;
   final Widget floatChild;
   final FloatWidgetPostion postion;
+  final double minSize;
+  final double topOffset;
+
   FloatWidget(
       {Key? key,
       this.postion = FloatWidgetPostion.bottomRight,
+      this.minSize = 50.0,
+      this.topOffset = 0.0,
       required this.child,
       required this.floatChild})
       : super(key: key);
@@ -36,6 +42,8 @@ class _FloatWidgetState extends State<FloatWidget> {
         Container(key: _childKey, child: widget.child),
         _FloatView(
           postion: widget.postion,
+          minSize: widget.minSize,
+          topOffset: widget.topOffset,
           key: _floatViewStateGlobalKey,
           child: widget.floatChild,
         )
@@ -47,8 +55,15 @@ class _FloatWidgetState extends State<FloatWidget> {
 class _FloatView extends StatefulWidget {
   final Widget child;
   final FloatWidgetPostion postion;
-  _FloatView({Key? key, required this.child, required this.postion})
-      : super(key: key);
+  final double minSize;
+  final double topOffset;
+
+  _FloatView({Key? key,
+    this.minSize = 50.0,
+    this.topOffset = 0.0,
+    required this.child,
+    required this.postion
+  }) : super(key: key);
 
   @override
   _FloatViewState createState() => _FloatViewState();
@@ -81,11 +96,11 @@ class _FloatViewState extends State<_FloatView> {
         break;
       case FloatWidgetPostion.bottomLeft:
         left = 0;
-        top = maxSize.height - currentSize.height;
+        top = maxSize.height - currentSize.height - widget.topOffset;
         break;
       case FloatWidgetPostion.bottomRight:
         left = maxSize.width - currentSize.width;
-        top = maxSize.height - currentSize.height;
+        top = maxSize.height - currentSize.height - widget.topOffset;
         break;
     }
     setState(() {});
@@ -132,7 +147,9 @@ class _FloatViewState extends State<_FloatView> {
 
   Size getCurrentSize() {
     double width = _containerKey.currentContext?.size?.width ?? 0;
+    width = max(width, widget.minSize);
     double height = _containerKey.currentContext?.size?.height ?? 0;
+    height = max(height, widget.minSize);
     return Size(width, height);
   }
 
